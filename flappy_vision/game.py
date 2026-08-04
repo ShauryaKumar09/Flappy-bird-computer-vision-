@@ -107,6 +107,24 @@ class World:
         self.state = GameState.PLAYING
         self.just_died = False
 
+    def set_difficulty(self, diff: cfg.Difficulty) -> None:
+        """Switch preset and return to the menu.
+
+        Always resets rather than swapping mid-flight: pipes already on screen
+        were placed for the old gap, and collision reads gap from the *current*
+        preset, so a live swap would silently change the geometry of obstacles
+        the player is already committed to.
+        """
+        if diff is self.diff:
+            return
+        self.diff = diff
+        self.bird = Bird()
+        self.pipes = []
+        self.score = 0
+        self.since_spawn = 0.0
+        self.state = GameState.MENU
+        self.just_died = False
+
     def flap(self) -> None:
         """The single control input. Doubles as start/restart."""
         if self.state is GameState.PLAYING:

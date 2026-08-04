@@ -32,11 +32,19 @@ KEY_FLAP = {32}
 KEY_RESET = {ord("r")}
 KEY_CALIBRATE = {ord("c")}
 KEY_AUTOPILOT = {ord("a")}
+# 1-4 pick a difficulty, in the order shown by the on-screen picker.
+KEY_DIFFICULTY = {ord(str(i + 1)): d for i, d in enumerate(cfg.DIFFICULTY_ORDER)}
 
 
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="flappy", description=__doc__)
-    p.add_argument("-d", "--difficulty", choices=sorted(cfg.DIFFICULTIES), default="normal")
+    p.add_argument(
+        "-d",
+        "--difficulty",
+        choices=[d.name for d in cfg.DIFFICULTY_ORDER],
+        default=cfg.DEFAULT_DIFFICULTY,
+        help="starting difficulty; also switchable in-game with 1-4",
+    )
     p.add_argument("--keyboard", action="store_true", help="spacebar only; skip the camera")
     p.add_argument("-c", "--camera", type=int, default=0, help="camera index")
     p.add_argument("--list-cameras", action="store_true", help="show available cameras and exit")
@@ -182,6 +190,9 @@ def run(args: argparse.Namespace) -> int:
         elif key in KEY_CALIBRATE and vision is not None:
             cal = cal or Calibrator(conf, sens)
             cal.restart()
+        elif key in KEY_DIFFICULTY:
+            world.set_difficulty(KEY_DIFFICULTY[key])
+            effects.clear()
         elif key in KEY_AUTOPILOT:
             bot = None if bot is not None else Autopilot()
             if bot is not None and world.state is not GameState.PLAYING:

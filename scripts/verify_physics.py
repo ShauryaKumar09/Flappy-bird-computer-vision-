@@ -65,7 +65,7 @@ def check_dt_independence() -> bool:
 
 def check_hover_rates() -> None:
     print("\nflaps/sec needed to hold altitude:")
-    for d in (cfg.CHILL, cfg.EASY, cfg.NORMAL, cfg.CLASSIC):
+    for d in cfg.DIFFICULTY_ORDER:
         rise = d.flap_impulse**2 / (2 * d.gravity)
         print(f"  {d.name:<8} {d.hover_rate:4.2f}/s   apex rise {rise:5.1f}px   gap {d.pipe_gap}px")
 
@@ -124,7 +124,9 @@ if __name__ == "__main__":
     # Classic is meant to be brutal, so it gets a lower bar - the check is that
     # it stays *playable*, not that it is easy.
     print("\nautopilot (60s cap, 6 seeds):")
-    for d, need in ((cfg.CHILL, 6), (cfg.EASY, 6), (cfg.NORMAL, 6), (cfg.CLASSIC, 4)):
+    # Only classic is allowed to kill the autopilot; the rest must be survivable.
+    for d in cfg.DIFFICULTY_ORDER:
+        need = 4 if d is cfg.CLASSIC else 6
         results[f"autopilot/{d.name}"] = check_gameplay(d, need)
     check_hover_rates()
     print()

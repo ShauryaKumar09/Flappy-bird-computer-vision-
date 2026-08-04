@@ -23,31 +23,35 @@ uv run flappy                           # calibrate, then flap
 |---|---|
 | `uv run flappy` | camera control, with calibration |
 | `uv run flappy -s high` | **flaps not registering? start here** |
-| `uv run flappy -d chill` | fewer flaps needed (0.9/sec instead of 1.6) |
+| `uv run flappy -d chill` | gentlest preset (0.76 flaps/sec) |
 | `uv run flappy --keyboard` | no camera; spacebar to flap |
-| `uv run flappy -d chill\|easy\|normal\|classic` | difficulty |
+| `uv run flappy -d chill\|normal\|hard\|classic` | starting difficulty |
 | `uv run flappy --list-cameras` | pick an index if 0 is your iPhone |
 | `uv run flappy --mode raise` | fall back to static arm-up detection |
 | `uv run flappy --record trace.json` | dump a landmark trace for offline tuning |
 
-Keys: `SPACE` flap · `C` recalibrate · `R` restart · `A` autopilot · `Q` quit
+Keys: `1`-`4` difficulty · `SPACE` flap · `C` recalibrate · `R` restart · `A` autopilot · `Q` quit
 
 ## If it's hard to play
 
 Two independent knobs, and they fix different problems:
 
 - **Flaps get missed** → `-s high`. That's detector sensitivity.
-- **Too many flaps needed / tiring** → `-d chill`. That's game physics.
+- **Too many flaps needed / tiring** → press `1` for chill. That's game physics.
 
-| preset | gap | hover rate | seconds between pipes |
-|---|---|---|---|
-| `chill` | 400px | 0.91/s | 5.5s |
-| `easy` | 340px | 1.10/s | 4.2s |
-| `normal` | 280px | 1.63/s | 2.8s |
-| `classic` | 200px | 2.02/s | 1.6s |
+Press **1-4 in game** to switch difficulty — no restart, no CLI flag needed.
+The picker is on the start and game-over screens.
 
-The playfield is 624px and the bird's collision box is 36px, so `chill` leaves
-about 10x the bird's height of slack.
+| key | preset | gap | hover rate | pipes every |
+|---|---|---|---|---|
+| `1` | `chill` | 460px | 0.76/s | 6.6s |
+| `2` | `normal` *(default)* | 400px | 0.91/s | 5.5s |
+| `3` | `hard` | 280px | 1.63/s | 2.8s |
+| `4` | `classic` | 200px | 2.02/s | 1.6s |
+
+The playfield is 624px and the bird's collision box is 36px, so `normal` leaves
+about 10x the bird's height of slack and costs under one flap per second to
+hover. `hard` and `classic` are where the original game's cruelty lives.
 
 Watch the HUD while playing. `swing` shows how big your current flap reads; if
 it says `FLAP BIGGER`, your motion is under the `min_span` floor. The `up`/`down`

@@ -155,11 +155,47 @@ def render_game(
     if world.state is GameState.PLAYING:
         draw_number(frame, assets, world.score, cfg.GAME_W / 2, 60)
     elif world.state is GameState.MENU:
-        blit_centered(frame, assets.message, cfg.GAME_W / 2, cfg.GAME_H / 2 - 40)
+        blit_centered(frame, assets.message, cfg.GAME_W / 2, cfg.GAME_H / 2 - 90)
+        draw_difficulty_picker(frame, world, cfg.GAME_H * 0.72)
     else:
         _draw_game_over(frame, assets, world)
 
     return frame
+
+
+def draw_difficulty_picker(dst: np.ndarray, world: World, y: float) -> None:
+    """Row of selectable presets, shown whenever the game is not in play."""
+    presets = cfg.DIFFICULTY_ORDER
+    pad, h = 8, 30
+    boxes = []
+    for i, d in enumerate(presets):
+        label = f"{i + 1} {d.name.upper()}"
+        (tw, _), _ = cv2.getTextSize(label, FONT, 0.45, 1)
+        boxes.append((label, tw + 18))
+
+    total = sum(w for _, w in boxes) + pad * (len(boxes) - 1)
+    x = cfg.GAME_W / 2 - total / 2
+    y0 = int(y)
+
+    for (label, w), d in zip(boxes, presets):
+        selected = d is world.diff
+        bg = cfg.C_ACCENT if selected else (52, 48, 44)
+        fg = cfg.C_BLACK if selected else cfg.C_DIM
+        cv2.rectangle(dst, (int(x), y0), (int(x + w), y0 + h), bg, -1)
+        (tw, th), _ = cv2.getTextSize(label, FONT, 0.45, 1)
+        cv2.putText(
+            dst,
+            label,
+            (int(x + (w - tw) / 2), y0 + (h + th) // 2),
+            FONT,
+            0.45,
+            fg,
+            1,
+            cv2.LINE_AA,
+        )
+        x += w + pad
+
+    _label(dst, "press 1-4 to change difficulty", cfg.GAME_W / 2, y0 + h + 24, 0.4)
 
 
 def _draw_game_over(dst: np.ndarray, assets: Assets, world: World) -> None:
@@ -175,7 +211,8 @@ def _draw_game_over(dst: np.ndarray, assets: Assets, world: World) -> None:
     _label(dst, "BEST", cx, cfg.GAME_H * 0.26 + 200, 0.55)
     draw_number(dst, assets, world.best, cx, cfg.GAME_H * 0.26 + 216)
 
-    _label(dst, "FLAP TO RETRY", cx, cfg.GAME_H * 0.26 + 320, 0.7)
+    _label(dst, "FLAP TO RETRY", cx, cfg.GAME_H * 0.26 + 300, 0.7)
+    draw_difficulty_picker(dst, world, cfg.GAME_H * 0.26 + 330)
 
 
 def _label(dst: np.ndarray, text: str, cx: float, y: float, scale: float = 0.6) -> None:

@@ -58,16 +58,23 @@ class Difficulty:
         return self.gravity / (2 * abs(self.flap_impulse))
 
 
-# Two separate levers on difficulty: hover_rate decides how *tiring* a preset
-# is, pipe_gap/pipe_spacing decide how *precise* you have to be. The bird's
-# collision box is only 36px tall, so a 400px gap in a 624px playfield is very
-# forgiving without being degenerate.
-CHILL = Difficulty("chill", 780.0, -430.0, 400, 95.0, 520)
-EASY = Difficulty("easy", 950.0, -430.0, 340, 112.0, 470)
-NORMAL = Difficulty("normal", 1400.0, -430.0, 280, 145.0, 400)
+# Two separate levers: hover_rate decides how *tiring* a preset is,
+# pipe_gap/pipe_spacing decide how *precise* you have to be. The bird's
+# collision box is only 36px tall, so normal's 400px gap in a 624px playfield
+# leaves roughly 10x the bird's height of slack.
+#
+# The ladder is anchored so that `normal` is the comfortable arm-flapping
+# experience rather than a challenge - hovering costs under one flap per second.
+# `hard` and `classic` are where the original game's cruelty lives.
+CHILL = Difficulty("chill", 650.0, -430.0, 460, 85.0, 560)
+NORMAL = Difficulty("normal", 780.0, -430.0, 400, 95.0, 520)
+HARD = Difficulty("hard", 1400.0, -430.0, 280, 145.0, 400)
 CLASSIC = Difficulty("classic", 2100.0, -520.0, 200, 205.0, 330)
 
-DIFFICULTIES = {d.name: d for d in (CHILL, EASY, NORMAL, CLASSIC)}
+# Order matters: this is the order shown in the in-game selector.
+DIFFICULTY_ORDER = (CHILL, NORMAL, HARD, CLASSIC)
+DIFFICULTIES = {d.name: d for d in DIFFICULTY_ORDER}
+DEFAULT_DIFFICULTY = "normal"
 
 
 # -------------------------------------------------------------- detector ----
