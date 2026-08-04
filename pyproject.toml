@@ -1,0 +1,19 @@
+[project]
+name = "flappy-vision"
+version = "0.1.0"
+description = "Flappy Bird controlled by flapping your arms at a webcam"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "mediapipe>=1.0.0",
+]
+
+[project.scripts]
+flappy = "flappy_vision.main:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["flappy_vision"]
