@@ -58,12 +58,14 @@ class Difficulty:
         return self.gravity / (2 * abs(self.flap_impulse))
 
 
-# hover_rate is the number that decides how tiring a preset is, not pipe_gap.
-# chill/easy sit near 1 flap/sec, which is a sustainable arm rhythm.
-CHILL = Difficulty("chill", 780.0, -430.0, 300, 100.0, 400)
-EASY = Difficulty("easy", 950.0, -430.0, 275, 118.0, 375)
-NORMAL = Difficulty("normal", 1400.0, -430.0, 220, 150.0, 340)
-CLASSIC = Difficulty("classic", 2100.0, -520.0, 160, 210.0, 300)
+# Two separate levers on difficulty: hover_rate decides how *tiring* a preset
+# is, pipe_gap/pipe_spacing decide how *precise* you have to be. The bird's
+# collision box is only 36px tall, so a 400px gap in a 624px playfield is very
+# forgiving without being degenerate.
+CHILL = Difficulty("chill", 780.0, -430.0, 400, 95.0, 520)
+EASY = Difficulty("easy", 950.0, -430.0, 340, 112.0, 470)
+NORMAL = Difficulty("normal", 1400.0, -430.0, 280, 145.0, 400)
+CLASSIC = Difficulty("classic", 2100.0, -520.0, 200, 205.0, 330)
 
 DIFFICULTIES = {d.name: d for d in (CHILL, EASY, NORMAL, CLASSIC)}
 

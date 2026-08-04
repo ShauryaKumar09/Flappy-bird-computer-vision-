@@ -39,7 +39,15 @@ Two independent knobs, and they fix different problems:
 - **Flaps get missed** → `-s high`. That's detector sensitivity.
 - **Too many flaps needed / tiring** → `-d chill`. That's game physics.
 
-`chill` needs 0.91 flaps/sec to hover; `normal` needs 1.63.
+| preset | gap | hover rate | seconds between pipes |
+|---|---|---|---|
+| `chill` | 400px | 0.91/s | 5.5s |
+| `easy` | 340px | 1.10/s | 4.2s |
+| `normal` | 280px | 1.63/s | 2.8s |
+| `classic` | 200px | 2.02/s | 1.6s |
+
+The playfield is 624px and the bird's collision box is 36px, so `chill` leaves
+about 10x the bird's height of slack.
 
 Watch the HUD while playing. `swing` shows how big your current flap reads; if
 it says `FLAP BIGGER`, your motion is under the `min_span` floor. The `up`/`down`

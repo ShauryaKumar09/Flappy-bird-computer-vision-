@@ -70,21 +70,23 @@ def check_hover_rates() -> None:
         print(f"  {d.name:<8} {d.hover_rate:4.2f}/s   apex rise {rise:5.1f}px   gap {d.pipe_gap}px")
 
 
-def check_gameplay(diff: cfg.Difficulty, floor: int, seeds: int = 6) -> bool:
-    """Median autopilot score over several seeds must clear `floor`.
+def check_gameplay(diff: cfg.Difficulty, min_survivors: int, seeds: int = 6) -> bool:
+    """How many seeds the autopilot survives a full minute on.
 
-    A single seed is far too noisy to judge a difficulty preset on - one unlucky
-    pipe placement early and the run ends at 0.
+    Survival is the meaningful measure, not score: with distance-based spawning
+    a surviving run's score is just runtime x speed / spacing, so widening the
+    gaps *lowers* the score while making the game easier. Judging presets on
+    score would punish exactly the change that helps.
     """
     runs = [_run_one(diff, s) for s in range(seeds)]
     scores = [r[0] for r in runs]
     survived = sum(1 for r in runs if not r[1])
-    med = statistics.median(scores)
     print(
-        f"  {diff.name:<8} scores={scores}  median={med:.1f}  "
-        f"survived {survived}/{seeds}  (floor {floor})"
+        f"  {diff.name:<8} survived {survived}/{seeds}  scores={scores}  "
+        f"median={statistics.median(scores):.1f}  (need {min_survivors}/{seeds})"
     )
-    return med >= floor
+    # Also guard against a preset so wide it stops spawning anything to dodge.
+    return survived >= min_survivors and min(scores) > 0
 
 
 def _run_one(diff: cfg.Difficulty, seed: int, cap_s: float = 60.0) -> tuple[int, bool]:
@@ -122,8 +124,8 @@ if __name__ == "__main__":
     # Classic is meant to be brutal, so it gets a lower bar - the check is that
     # it stays *playable*, not that it is easy.
     print("\nautopilot (60s cap, 6 seeds):")
-    for d, floor in ((cfg.CHILL, 12), (cfg.EASY, 14), (cfg.NORMAL, 12), (cfg.CLASSIC, 5)):
-        results[f"autopilot/{d.name}"] = check_gameplay(d, floor)
+    for d, need in ((cfg.CHILL, 6), (cfg.EASY, 6), (cfg.NORMAL, 6), (cfg.CLASSIC, 4)):
+        results[f"autopilot/{d.name}"] = check_gameplay(d, need)
     check_hover_rates()
     print()
     for name, passed in results.items():

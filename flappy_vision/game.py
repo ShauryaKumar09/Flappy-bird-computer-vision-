@@ -116,10 +116,15 @@ class World:
             self.bird.flap(self.diff)
 
     def _spawn(self) -> None:
-        margin = 60
+        # Margin keeps a gap from hugging the ceiling or ground. With the large
+        # forgiving gaps it has to stay small, or there is no vertical variety
+        # left to place them in.
+        margin = 40
         half = self.diff.pipe_gap / 2
         lo = int(half + margin)
         hi = int(cfg.PLAY_H - half - margin)
+        if lo >= hi:  # gap nearly fills the playfield; centre it
+            lo = hi = int(cfg.PLAY_H / 2)
         self.pipes.append(Pipe(x=float(cfg.GAME_W), gap_y=float(self.rng.randint(lo, hi))))
 
     def _collided(self) -> bool:
