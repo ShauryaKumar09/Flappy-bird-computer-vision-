@@ -42,12 +42,16 @@ Two independent knobs, and they fix different problems:
 Press **1-4 in game** to switch difficulty — no restart, no CLI flag needed.
 The picker is on the start and game-over screens.
 
-| key | preset | gap | hover rate | pipes every |
+| key | preset | gap | hover rate | a point every |
 |---|---|---|---|---|
-| `1` | `chill` | 460px | 0.76/s | 6.6s |
-| `2` | `normal` *(default)* | 400px | 0.91/s | 5.5s |
-| `3` | `hard` | 280px | 1.63/s | 2.8s |
-| `4` | `classic` | 200px | 2.02/s | 1.6s |
+| `1` | `chill` | 460px | 0.76/s | 2.5s |
+| `2` | `normal` *(default)* | 400px | 0.91/s | 2.1s |
+| `3` | `hard` | 280px | 1.63/s | 1.9s |
+| `4` | `classic` | 200px | 2.02/s | 1.5s |
+
+Scoring pace is `pipe_spacing / pipe_speed`. Wide gaps buy slack, and the right
+thing to spend it on is tempo — a point every ~2s plays like a game, a point
+every ~5s plays like waiting.
 
 The playfield is 624px and the bird's collision box is 36px, so `normal` leaves
 about 10x the bird's height of slack and costs under one flap per second to
@@ -60,8 +64,12 @@ ticks show the live band — in adaptive mode they move with you.
 | sensitivity | smallest reliable flap | note |
 |---|---|---|
 | `low` | 1.60 shoulder-widths | big committed swings only |
-| `normal` | 0.90 | default |
-| `high` | 0.55 (~22cm of wrist travel) | may false-fire on very noisy tracking |
+| `normal` | 0.55 (~22cm of wrist travel) | default |
+| `high` | 0.55, degrades gracefully to 0.35 | may false-fire on very noisy tracking |
+
+The presets differ almost only in `min_span` — how much total swing counts as a
+flap. That is the lever; moving the trigger height instead does nothing (see
+below).
 
 ## Why it's a dupe, not a port
 
@@ -103,9 +111,14 @@ Two subtleties, both found by measurement rather than intuition:
 - **Envelope decay must be relative (a time constant), not a fixed rate.** A
   fixed shoulder-widths/sec release outruns a small flap, collapsing the
   envelope between strokes so gentle flapping stops registering entirely.
-- **`min_span` is a real tradeoff.** Still arms with noisy tracking produce an
-  envelope up to ~0.12 wide (measured at σ=0.08), so lowering the floor to catch
-  tiny flaps eventually starts catching jitter. That's what `-s high` trades.
+- **`min_span` is the lever, not the trigger height.** Lowering `up_frac` from
+  0.62 to 0.42 does not improve small-flap detection at all; lowering `min_span`
+  from 0.30 to 0.22 takes an amplitude-0.55 flap from 3/10 to 10/10. A "high"
+  preset that lowered *both* actually scored worse (9/10) than one that moved
+  `min_span` alone (10/10).
+- **That tradeoff has a floor.** Still arms with noisy tracking produce an
+  envelope up to ~0.12 wide (measured at σ=0.08), so it cannot go arbitrarily
+  low without catching jitter. That's what `-s high` trades.
 
 Calibration scales `min_span` to your body and refuses to apply anything if your
 arms-up and arms-down poses look the same.

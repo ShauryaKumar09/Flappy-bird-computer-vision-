@@ -66,10 +66,14 @@ class Difficulty:
 # The ladder is anchored so that `normal` is the comfortable arm-flapping
 # experience rather than a challenge - hovering costs under one flap per second.
 # `hard` and `classic` are where the original game's cruelty lives.
-CHILL = Difficulty("chill", 650.0, -430.0, 460, 85.0, 560)
-NORMAL = Difficulty("normal", 780.0, -430.0, 400, 95.0, 520)
-HARD = Difficulty("hard", 1400.0, -430.0, 280, 145.0, 400)
-CLASSIC = Difficulty("classic", 2100.0, -520.0, 200, 205.0, 330)
+# Scoring pace is pipe_spacing / pipe_speed. Wide gaps buy a lot of slack, and
+# the right thing to spend it on is tempo: a point every ~2s feels like a game,
+# a point every ~5s feels like waiting. Speed is raised and spacing tightened
+# together so pipes arrive often without the scroll becoming a blur.
+CHILL = Difficulty("chill", 650.0, -430.0, 460, 120.0, 300)
+NORMAL = Difficulty("normal", 780.0, -430.0, 400, 140.0, 300)
+HARD = Difficulty("hard", 1400.0, -430.0, 280, 175.0, 330)
+CLASSIC = Difficulty("classic", 2100.0, -520.0, 200, 215.0, 320)
 
 # Order matters: this is the order shown in the in-game selector.
 DIFFICULTY_ORDER = (CHILL, NORMAL, HARD, CLASSIC)
@@ -96,13 +100,19 @@ class Sensitivity:
     min_span: float  # smallest flap that counts, in shoulder-widths
 
 
-# min_span is the real tradeoff. Still arms with noisy tracking produce an
-# envelope up to ~0.12 wide (measured, sigma 0.08), so dropping the floor to
-# catch tiny flaps eventually starts catching jitter. 0.55 shoulder-widths is
-# roughly 22cm of wrist travel - a genuinely small flap - and is safe at 0.30.
-SENS_LOW = Sensitivity("low", 0.70, 0.45, 0.60, 0.40)  # big deliberate flaps only
-SENS_NORMAL = Sensitivity("normal", 0.62, 0.38, 0.45, 0.30)  # ordinary wing flap
-SENS_HIGH = Sensitivity("high", 0.55, 0.32, 0.32, 0.20)  # tiny flaps; may false-fire
+# min_span, not up_frac, is what decides how small a flap can be. Swept in
+# scripts/verify_detector.py: dropping up_frac 0.62 -> 0.42 does not improve
+# small-flap detection at all, while dropping min_span 0.30 -> 0.22 takes an
+# amplitude-0.55 flap from 3/10 to 10/10.
+#
+# The cost is false fires. Still arms with noisy tracking produce an envelope up
+# to ~0.12 wide (measured at sigma 0.08), so the floor cannot go arbitrarily low.
+# The presets therefore differ almost only in min_span. Moving up_frac/v_frac
+# alongside it measurably *hurt*: a "high" preset that also lowered those scored
+# 9/10 on amplitude-0.55 flaps where one changing min_span alone scored 10/10.
+SENS_LOW = Sensitivity("low", 0.55, 0.32, 0.45, 0.34)  # big deliberate flaps only
+SENS_NORMAL = Sensitivity("normal", 0.55, 0.32, 0.35, 0.22)  # ordinary wing flap
+SENS_HIGH = Sensitivity("high", 0.55, 0.32, 0.28, 0.16)  # tiny flaps; may false-fire
 
 SENSITIVITIES = {s.name: s for s in (SENS_LOW, SENS_NORMAL, SENS_HIGH)}
 
@@ -136,11 +146,11 @@ class DetectorConfig:
     # the band inside it, so where you hold your arms stops mattering. The
     # fixed h_up/h_down above are the fallback when this is off.
     adaptive: bool = True
-    up_frac: float = 0.62  # h_up position within the recent envelope
-    down_frac: float = 0.38  # h_down position
-    min_span: float = 0.30  # envelope narrower than this = "not flapping"
-    v_frac: float = 0.45  # velocity gate as a fraction of envelope span
-    v_floor: float = 0.55  # never gate below this, or noise fires it
+    up_frac: float = 0.55  # h_up position within the recent envelope
+    down_frac: float = 0.32  # h_down position
+    min_span: float = 0.22  # envelope narrower than this = "not flapping"
+    v_frac: float = 0.35  # velocity gate as a fraction of envelope span
+    v_floor: float = 0.40  # never gate below this, or noise fires it
 
     # One-euro filter tuning for the elevation signal.
     min_cutoff: float = 1.2

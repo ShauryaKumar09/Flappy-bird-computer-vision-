@@ -201,7 +201,7 @@ def check_amplitude_invariance() -> bool:
     can I get away with", and `-s high` is what to reach for when tired.
     """
     print("\namplitude coverage (centre -0.3, min count across 0.75/1.5/2.5 Hz):")
-    floors = {"low": 1.60, "normal": 0.90, "high": 0.55}
+    floors = {"low": 1.60, "normal": 0.55, "high": 0.55}
     ok = True
     for sens in (cfg.SENS_LOW, cfg.SENS_NORMAL, cfg.SENS_HIGH):
         conf = cfg.DetectorConfig()
